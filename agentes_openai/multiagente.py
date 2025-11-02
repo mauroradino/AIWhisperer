@@ -1,8 +1,11 @@
 from agents import Agent, Runner, function_tool
 from dotenv import load_dotenv
+from pydantic import BaseModel
 import requests
 load_dotenv()
 
+#################
+## Herramienta ##
 @function_tool
 def obtener_info_simpsons(nombre_personaje: str) -> str:
     characters_data = requests.get("https://thesimpsonsapi.com/api/characters")
@@ -14,14 +17,31 @@ def obtener_info_simpsons(nombre_personaje: str) -> str:
         return "Personaje no encontrado."
     else:
         return "Error al obtener datos de Los Simpsons."
+## Herramienta ##
+#################
 
 
+class SimpsonsOutputParser(BaseModel):
+    name: str
+    age: int
+    occupation: str
+    gender: str
+    birthdate: str
+
+############
+## Agente ##
 agente_simpsons = Agent(
     name="SimpAgent", 
     instructions="Sos un experto en la serie Los Simpsons. Responde preguntas relacionadas con personajes de la serie",
     handoff_description="Sos un agente especializado en Los Simpsons.",
-    tools=[obtener_info_simpsons])
+    tools=[obtener_info_simpsons],
+    #output_type=SimpsonsOutputParser
+    )
+## Agente ##
+############
 
+#################
+## Herramienta ##
 @function_tool
 def obtener_info_pokemon(nombre_pokemon: str) -> str:
     response = requests.get(f"https://pokeapi.co/api/v2/pokemon/{nombre_pokemon.lower()}")
@@ -32,19 +52,33 @@ def obtener_info_pokemon(nombre_pokemon: str) -> str:
         return f"{data['name'].title()}: Tipos: {', '.join(tipos)}. Habilidades: {', '.join(habilidades)}."
     else:
         return "Pokemon no encontrado."
+## Herramienta ##
+#################
 
 
+############
+## Agente ##
 agente_pokemon = Agent(
     name="PokemonAgent",
     instructions="Sos un experto en pokemon. Tenes una herramienta para obtener informacion de los pokemon.",
     handoff_description="Sos un agente especializado en pokemon",
     tools=[obtener_info_pokemon]
     )
+## Agente ##
+############
+
+
+############
+## Agente ##
 agente_maestro = Agent(
     name="MaestroAgent", 
-    instructions="Sos el coordinador de un equipo de maestros. Tenes que delegar preguntas a otros agentes segun su especialidad. Si la pregunta es matematica, preguntale al agente de matematicas. Si la pregunta es traduccion, preguntale al agente de traduccion. Responde en el mismo idioma en que te pregunten.",
+    instructions="Sos el coordinador de un equipo de agentes. Tenes que delegar preguntas a otros agentes segun su especialidad. Si la pregunta es sobre pokemon lo delegas al agente de pokemon, si es de la serie los simpsons lo delegas al agente que se encarga de eso. Responde en el mismo idioma en que te pregunten.",
     handoffs = [agente_simpsons, agente_pokemon]
 )
+## Agente ##
+############
+
+
 
 def test_2():
     while True:
