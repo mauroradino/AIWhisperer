@@ -20,7 +20,6 @@ def obtener_info_simpsons(nombre_personaje: str) -> str:
 ## Herramienta ##
 #################
 
-
 class SimpsonsOutputParser(BaseModel):
     name: str
     age: int
@@ -35,7 +34,7 @@ agente_simpsons = Agent(
     instructions="Sos un experto en la serie Los Simpsons. Responde preguntas relacionadas con personajes de la serie",
     handoff_description="Sos un agente especializado en Los Simpsons.",
     tools=[obtener_info_simpsons],
-    #output_type=SimpsonsOutputParser
+    output_type=SimpsonsOutputParser
     )
 ## Agente ##
 ############
